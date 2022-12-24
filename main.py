@@ -36,6 +36,7 @@ pygame.time.set_timer(pipe_spawn, 1900)
 bird_flap = pygame.USEREVENT + 1
 pygame.time.set_timer(bird_flap, 200)
 
+# CLASS DEFINES FLOOR BIRD
 class Bird:
     def __init__(self, x, y):
         self.x = x
@@ -44,16 +45,17 @@ class Bird:
         self.movement = 0
         self.flap_number = 0
         self.bird_surface = bird_surfaces
-        self.bird_surface_rect = self.bird_surface[self.flap_number].get_rect(center=(self.x, self.y))
-    
+        self.bird_surface_rect = self.bird_surface[self.flap_number].get_rect(
+            center=(self.x, self.y))
+
     def move(self):
         self.movement += self.gravity
         self.bird_surface_rect.centery += self.movement
-    
-    def jump (self):
+
+    def jump(self):
         self.movement = 0
-        self.movement -= 6
-    
+        self.movement -= 7
+
     def collide(self, pipes):
         for pipe in pipes.pipe_list:
             if self.bird_surface_rect.colliderect(pipe):
@@ -66,7 +68,8 @@ class Bird:
             self.flap_number = 0
 
     def draw(self, win):
-        rotate_bird = pygame.transform.rotozoom(self.bird_surface[self.flap_number], -self.movement * 3, 1)
+        rotate_bird = pygame.transform.rotozoom(
+            self.bird_surface[self.flap_number], -self.movement * 3, 1)
         win.blit(rotate_bird, self.bird_surface_rect)
 
 # CLASS DEFINES FLOOR ELEMENTS
@@ -132,7 +135,7 @@ def draw_screen(win, floor, pipes, bird, score):
 
     score_label = game_font.render(f'Score: {score}', 1, white)
     win.blit(score_label, (screen_width - score_label.get_width() - 15, 10))
-    
+
     pygame.display.update()
 
 
@@ -164,21 +167,22 @@ def main():
                 bird.bird_animation()
 
         # PIPES WILL MOVE ACROSS THE SCREEN (FROM RIGHT TO LEFT)
+        # AND PIPES WILL BE REMOVED FROM GAME ONCE THEY MOVE LEFT OFF THE SCREEN
         for pipe in pipes.pipe_list:
             if pipe.centerx < -50:
                 pipes.pipe_list.remove(pipe)
-        
+
         # IF BIRD COLLIDES WITH PIPE OR FLOOR/CEILING, THE GAME WILL END
         if bird.collide(pipes) == True:
             run = False
             print('GAME OVER!')
-        elif bird.bird_surface_rect.centery >= 620 or bird.bird_surface_rect.centery <= -10:  
+        elif bird.bird_surface_rect.centery >= 620 or bird.bird_surface_rect.centery <= -10:
             run = False
             print('GAME OVER!')
 
+        # SCORE UPDATES BY ONE WHEN BIRD PASSES A PIPE
         if update_score(pipes) == True:
             score += 1
-        
 
         # MOVES FLOOR
         floor.move()
