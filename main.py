@@ -85,7 +85,6 @@ class Floor:
         if self.x <= -500:
             self.x = 0
 
-
 # CLASS DEFINES FLOOR ELEMENTS
 class Pipes:
     def __init__(self):
@@ -116,6 +115,7 @@ class Pipes:
             else:
                 win.blit(self.pipes_surface_top, pipe)
 
+
 # UPDATES CURERNT SCORE IN GAME
 def update_score(pipes):
     for pipe in pipes.pipe_list:
@@ -131,7 +131,7 @@ def draw_screen(win, floor, pipes, bird, score):
     bird.draw(win)
 
     score_label = game_font.render(f'Score: {score}', 1, white)
-    win.blit(score_label, (300, 200))
+    win.blit(score_label, (screen_width - score_label.get_width() - 15, 10))
     
     pygame.display.update()
 
