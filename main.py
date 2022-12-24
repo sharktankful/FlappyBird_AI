@@ -1,5 +1,5 @@
 import pygame
-import neat
+import neat 
 import random
 import os
 import sys
@@ -99,6 +99,7 @@ class Pipes:
         self.pipes_surface_bottom = pipes_surface
         self.pipes_surface_top = pygame.transform.flip(
             pipes_surface, False, True)
+        self.pipe_index = 0
 
     def create_pipe_rect(self):
         height = random.randrange(270, 610)
@@ -143,14 +144,28 @@ def draw_screen(win, floor, pipes, bird, score):
 
 
 # MAIN GAME FUNCTION
-def main():
+def main(genomes, config):
+    # LIST VARIABLES FOR NEAT
+    birds = []
+    nets = []
+    ge = []
+
     # FUNCTION VARIABLES
     score = 0
     clock = pygame.time.Clock()
     win = pygame.display.set_mode((screen_width, screen_height))
     floor = Floor()
     pipes = Pipes()
-    bird = Bird(100, 200)
+    # bird = Bird(100, 200)
+
+    
+    for genome_id, g in genomes:
+        net = neat.nn.FeedForwardNetwork.create(g, config)
+        nets.append(net)
+        birds.append(Bird(100, 200))
+        g.fitness = 0
+        ge.append(g)
+
 
     # MAIN GAME LOOP
     run = True
@@ -161,13 +176,20 @@ def main():
                 run = False
                 pygame.quit
                 sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    bird.jump()
+            # if event.type == pygame.KEYDOWN:
+                # if event.key == pygame.K_SPACE:
+                #     bird.jump()
             if event.type == pipe_spawn:
                 pipes.pipe_list.extend(pipes.create_pipe_rect())
-            if event.type == bird_flap:
-                bird.bird_animation()
+            for bird in birds:
+                if event.type == bird_flap:
+                    bird.bird_animation()
+        
+        # FINISH MAKING PIPE INDEX
+        pipe_index = 0
+        if len(birds) > 0:
+            if len(pipes.pipe_list) > 1 and birds[0] > pipes.pipe_list[0].centerx +
+
 
         # PIPES WILL MOVE ACROSS THE SCREEN (FROM RIGHT TO LEFT)
         # AND PIPES WILL BE REMOVED FROM GAME ONCE THEY MOVE LEFT OFF THE SCREEN
@@ -175,29 +197,55 @@ def main():
             if pipe.centerx < -50:
                 pipes.pipe_list.remove(pipe)
 
+
         # IF BIRD COLLIDES WITH PIPE OR FLOOR/CEILING, THE GAME WILL END
-        if bird.collide(pipes) == True:
-            run = False
-            print('GAME OVER!')
-        elif bird.bird_surface_rect.centery >= 620 or bird.bird_surface_rect.centery <= -10:
-            run = False
-            print('GAME OVER!')
+        for x, bird in enumerate (birds):
+            if bird.collide(pipes) == True:
+                ge[x].fitness -= 1
+                birds.pop(x)
+                nets.pop(x)
+                ge.pop(x)
+            elif bird.bird_surface_rect.centery >= 620 or bird.bird_surface_rect.centery <= -10:
+                ge[x].fitness -= 1
+                birds.pop(x)
+                nets.pop(x)
+                ge.pop(x)
 
         # SCORE UPDATES BY ONE WHEN BIRD PASSES A PIPE
         if update_score(pipes) == True:
             score += 1
+            for g in ge:
+                g.fitness += 5
 
         # MOVES FLOOR
-        # floor.move()
+        floor.move()
 
         # MOVES PIPE
-        # pipes.move()
+        pipes.move()
 
         # APPLIES GRAVITY TO BIRD
-        # bird.move()
+        for bird in birds:
+            bird.move()
 
         # PUTS IMAGES IN GAME
         draw_screen(win, floor, pipes, bird, score)
 
 
 main()
+
+# LOADS NEAT CONFIG FILE
+# def run(config_path):
+#     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
+
+#     p = neat.Population(config)
+
+#     p.add_reporter(neat.StdOutReporter(True))
+#     stats = neat.StatisticsReporter()
+#     p.add_reporter(stats)
+
+#     winner = p.run(main, 50)
+
+# if __name__ == '__main__':
+#     local_dir = os.path.dirname(__file__)
+#     config_path = os.path.join(local_dir, 'config-feedforward.txt')
+#     run(config_path)
