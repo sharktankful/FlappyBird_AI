@@ -7,6 +7,9 @@ import sys
 # INTITALIZE PYGAME
 pygame.init()
 
+# WINDOW CAPTION
+pygame.display.set_caption('AI Flappy Bird')
+
 # SCREEN VARIABLE DIMESNIONS
 screen_width = 500
 screen_height = 800
@@ -185,13 +188,13 @@ def main():
             score += 1
 
         # MOVES FLOOR
-        floor.move()
+        # floor.move()
 
         # MOVES PIPE
-        pipes.move()
+        # pipes.move()
 
         # APPLIES GRAVITY TO BIRD
-        bird.move()
+        # bird.move()
 
         # PUTS IMAGES IN GAME
         draw_screen(win, floor, pipes, bird, score)
