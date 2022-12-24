@@ -188,7 +188,7 @@ def main(genomes, config):
         # FINISH MAKING PIPE INDEX
         pipe_index = 0
         if len(birds) > 0:
-            if len(pipes.pipe_list) > 1 and birds[0] > pipes.pipe_list[0].centerx +
+            if len(pipes.pipe_list) > 1 and birds[0].x > pipes.pipe_list[0].centerx +
 
 
         # PIPES WILL MOVE ACROSS THE SCREEN (FROM RIGHT TO LEFT)
