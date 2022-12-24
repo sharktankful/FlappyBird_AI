@@ -11,6 +11,10 @@ pygame.init()
 screen_width = 500
 screen_height = 800
 
+# GAME FONT/COLOR
+game_font = pygame.font.SysFont('comicsans', 50)
+white = (255, 255, 255)
+
 # IMAGES
 bg_surface = pygame.transform.scale(pygame.image.load(
     os.path.join('assets', 'background-night.png')), (screen_width, screen_height))
@@ -112,19 +116,30 @@ class Pipes:
             else:
                 win.blit(self.pipes_surface_top, pipe)
 
+# UPDATES CURERNT SCORE IN GAME
+def update_score(pipes):
+    for pipe in pipes.pipe_list:
+        if pipe.centerx == 100:
+            return True
+
 
 # DRAWS OBJECTS/BACKGROUND IMAGES TO SCREEN
-def draw_screen(win, floor, pipes, bird):
+def draw_screen(win, floor, pipes, bird, score):
     win.blit(bg_surface, (0, 0))
     pipes.draw(win)
     floor.draw(win)
     bird.draw(win)
+
+    score_label = game_font.render(f'Score: {score}', 1, white)
+    win.blit(score_label, (300, 200))
+    
     pygame.display.update()
 
 
 # MAIN GAME FUNCTION
 def main():
     # FUNCTION VARIABLES
+    score = 0
     clock = pygame.time.Clock()
     win = pygame.display.set_mode((screen_width, screen_height))
     floor = Floor()
@@ -161,6 +176,10 @@ def main():
             run = False
             print('GAME OVER!')
 
+        if update_score(pipes) == True:
+            score += 1
+        
+
         # MOVES FLOOR
         floor.move()
 
@@ -171,7 +190,7 @@ def main():
         bird.move()
 
         # PUTS IMAGES IN GAME
-        draw_screen(win, floor, pipes, bird)
+        draw_screen(win, floor, pipes, bird, score)
 
 
 main()
