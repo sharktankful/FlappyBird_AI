@@ -59,11 +59,6 @@ class Bird:
         self.movement = 0
         self.movement -= 7
 
-    def collide(self, pipes):
-        for pipe in pipes.pipe_list:
-            if self.bird_surface_rect.colliderect(pipe):
-                return True
-
     def bird_animation(self):
         if self.flap_number < 2:
             self.flap_number += 1
@@ -94,46 +89,28 @@ class Floor:
 # CLASS DEFINES FLOOR ELEMENTS
 class Pipes:
     def __init__(self):
-        self.pipe_list = []
-
+        # self.pipe_list = []
+        self.pipe_passed = False
+        self.height = random.randrange(300,600)
         self.pipes_surface_bottom = pipes_surface
-        self.pipes_surface_top = pygame.transform.flip(
-            pipes_surface, False, True)
-        self.pipe_index = 0
-
-    def create_pipe_rect(self):
-        height = random.randrange(270, 610)
-
-        pipes_surface_bottom_rect = self.pipes_surface_bottom.get_rect(
-            midtop=(580, height))
-        pipes_surface_top_rect = self.pipes_surface_top.get_rect(
-            midbottom=(580, height - 200))
-
-        return pipes_surface_bottom_rect, pipes_surface_top_rect
+        self.pipes_surface_bottom_rect = self.pipes_surface_bottom.get_rect(midtop=(550, self.height))
+        self.pipes_surface_top = pygame.transform.flip(pipes_surface, False, True)
+        self.pipes_surface_top_rect = self.pipes_surface_top.get_rect(midbottom=(550, self.height - 200))
 
     def move(self):
-        for pipe in self.pipe_list:
-            pipe.centerx -= 3
+        self.pipes_surface_bottom_rect.centerx -= 3
+        self.pipes_surface_top_rect.centerx -= 3
 
     def draw(self, win):
-        for pipe in self.pipe_list:
-            if pipe.bottom >= 800:
-                win.blit(self.pipes_surface_bottom, pipe)
-            else:
-                win.blit(self.pipes_surface_top, pipe)
-
-
-# UPDATES CURERNT SCORE IN GAME
-def update_score(pipes):
-    for pipe in pipes.pipe_list:
-        if pipe.centerx == 100:
-            return True
+        win.blit(self.pipes_surface_top, self.pipes_surface_top_rect)
+        win.blit(self.pipes_surface_bottom, self.pipes_surface_bottom_rect)
 
 
 # DRAWS OBJECTS/BACKGROUND IMAGES TO SCREEN
 def draw_screen(win, floor, pipes, bird, score):
     win.blit(bg_surface, (0, 0))
-    pipes.draw(win)
+    for pipe in pipes:
+        pipe.draw(win)
     floor.draw(win)
     bird.draw(win)
 
@@ -144,27 +121,14 @@ def draw_screen(win, floor, pipes, bird, score):
 
 
 # MAIN GAME FUNCTION
-def main(genomes, config):
-    # LIST VARIABLES FOR NEAT
-    birds = []
-    nets = []
-    ge = []
-
+def main():
     # FUNCTION VARIABLES
     score = 0
     clock = pygame.time.Clock()
     win = pygame.display.set_mode((screen_width, screen_height))
     floor = Floor()
-    pipes = Pipes()
-    # bird = Bird(100, 200)
-
-    
-    for genome_id, g in genomes:
-        net = neat.nn.FeedForwardNetwork.create(g, config)
-        nets.append(net)
-        birds.append(Bird(100, 200))
-        g.fitness = 0
-        ge.append(g)
+    pipes = [Pipes()]
+    bird = Bird(100, 200)
 
 
     # MAIN GAME LOOP
@@ -176,57 +140,51 @@ def main(genomes, config):
                 run = False
                 pygame.quit
                 sys.exit()
-            # if event.type == pygame.KEYDOWN:
-                # if event.key == pygame.K_SPACE:
-                #     bird.jump()
-            if event.type == pipe_spawn:
-                pipes.pipe_list.extend(pipes.create_pipe_rect())
-            for bird in birds:
-                if event.type == bird_flap:
-                    bird.bird_animation()
-        
-        # FINISH MAKING PIPE INDEX
-        pipe_index = 0
-        if len(birds) > 0:
-            if len(pipes.pipe_list) > 1 and birds[0].x > pipes.pipe_list[0].centerx +
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    bird.jump()
+            if event.type == bird_flap:
+                bird.bird_animation()    
 
 
+        # HOW PIPES WILL BEHAVE IN THE GAME
+        add_pipe = False
+        removed_pipes = []
+        for pipe in pipes:
         # PIPES WILL MOVE ACROSS THE SCREEN (FROM RIGHT TO LEFT)
-        # AND PIPES WILL BE REMOVED FROM GAME ONCE THEY MOVE LEFT OFF THE SCREEN
-        for pipe in pipes.pipe_list:
-            if pipe.centerx < -50:
-                pipes.pipe_list.remove(pipe)
+            pipe.move()
 
+            # IF TOP/BOTTOM PIPE HITS BIRD, THE GAME WILL BE OVER
+            if pipe.pipes_surface_bottom_rect.colliderect(bird.bird_surface_rect) or pipe.pipes_surface_top_rect.colliderect(bird.bird_surface_rect):
+                run = False
+                print('Game Over')
 
-        # IF BIRD COLLIDES WITH PIPE OR FLOOR/CEILING, THE GAME WILL END
-        for x, bird in enumerate (birds):
-            if bird.collide(pipes) == True:
-                ge[x].fitness -= 1
-                birds.pop(x)
-                nets.pop(x)
-                ge.pop(x)
-            elif bird.bird_surface_rect.centery >= 620 or bird.bird_surface_rect.centery <= -10:
-                ge[x].fitness -= 1
-                birds.pop(x)
-                nets.pop(x)
-                ge.pop(x)
+            if pipe.pipe_passed == False and pipe.pipes_surface_bottom_rect.centerx < bird.x:
+                pipe.pipe_passed = True
+                add_pipe = True
 
-        # SCORE UPDATES BY ONE WHEN BIRD PASSES A PIPE
-        if update_score(pipes) == True:
+            # AND PIPES WILL BE REMOVED FROM GAME ONCE THEY MOVE LEFT OFF THE SCREEN
+            if pipe.pipes_surface_bottom_rect.centerx < -50:
+                removed_pipes.append(pipe)
+
+        # NEW PIPE IS MOVE ACROSS SCREEN AND SCORE INCREASED BY ONE
+        if add_pipe:
             score += 1
-            for g in ge:
-                g.fitness += 5
+            pipes.append(Pipes())
+        
+        removed_pipes.clear()
+
+        # IF BIRD HITS FLOOR OR CEILING, THE GAME WILL END
+        if bird.bird_surface_rect.centery >= 620 or bird.bird_surface_rect.centery <= -10:
+            run = False
+            print('Game Over!')
 
         # MOVES FLOOR
         floor.move()
 
-        # MOVES PIPE
-        pipes.move()
-
         # APPLIES GRAVITY TO BIRD
-        for bird in birds:
-            bird.move()
-
+        bird.move() 
+       
         # PUTS IMAGES IN GAME
         draw_screen(win, floor, pipes, bird, score)
 
