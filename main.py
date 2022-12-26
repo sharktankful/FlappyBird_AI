@@ -34,9 +34,7 @@ downflap_surface = pygame.transform.scale2x(
 bird_surfaces = [upflap_surface, midflap_surface, downflap_surface]
 
 # TIMED EVENTS
-pipe_spawn = pygame.USEREVENT
-pygame.time.set_timer(pipe_spawn, 1900)
-bird_flap = pygame.USEREVENT + 1
+bird_flap = pygame.USEREVENT
 pygame.time.set_timer(bird_flap, 200)
 
 # CLASS DEFINES FLOOR BIRD
@@ -109,8 +107,10 @@ class Pipes:
 # DRAWS OBJECTS/BACKGROUND IMAGES TO SCREEN
 def draw_screen(win, floor, pipes, bird, score):
     win.blit(bg_surface, (0, 0))
+
     for pipe in pipes:
         pipe.draw(win)
+
     floor.draw(win)
     bird.draw(win)
 
