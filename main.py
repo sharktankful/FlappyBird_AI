@@ -41,7 +41,7 @@ bird_flap = pygame.USEREVENT
 pygame.time.set_timer(bird_flap, 100)
 
 
-# CLASS DEFINES FLOOR BIRD
+# CLASS DEFINES BIRD ELEMENTS
 class Bird:
     def __init__(self, x, y):
         self.x = x
@@ -99,7 +99,6 @@ class Floor:
 # CLASS DEFINES FLOOR ELEMENTS
 class Pipes:
     def __init__(self):
-        # self.pipe_list = []
         self.pipe_passed = False
         self.height = random.randrange(300, 600)
         self.pipes_surface_bottom = pipes_surface
