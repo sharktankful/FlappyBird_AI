@@ -120,7 +120,7 @@ class Pipes:
 
 
 # DRAWS OBJECTS/BACKGROUND IMAGES TO SCREEN
-def draw_screen(win, floor, pipes, birds, score, generation):
+def draw_screen(win, floor, pipes, birds, score, generation, alive):
     win.blit(bg_surface, (0, 0))
 
     for pipe in pipes:
@@ -137,6 +137,11 @@ def draw_screen(win, floor, pipes, birds, score, generation):
     generation_label = game_font.render(f'Gen: {generation}', 1, white)
     win.blit(generation_label, (10, 10))
 
+    alive_label = game_font.render(f'Alive: {alive}', 1, white)
+    win.blit(alive_label, (10, 60))
+
+
+
     pygame.display.update()
 
 
@@ -144,8 +149,7 @@ def draw_screen(win, floor, pipes, birds, score, generation):
 def main(genomes, config):
     global generation
 
-    # VARIABLES FOR NEURAL NETWORK
-    generation += 1
+    # LISTS FOR NEURAL NETWORK
     birds = []
     nets = []
     ge = []
@@ -157,6 +161,10 @@ def main(genomes, config):
         nets.append(net)
         birds.append(Bird(230, 350))
         ge.append(g)
+
+    # NEURAL NETWORK VARIABLE COUNTERS
+    generation += 1
+    alive = len(birds)
 
     # FUNCTION VARIABLES
     score = 0
@@ -207,6 +215,7 @@ def main(genomes, config):
                     birds.pop(x)
                     nets.pop(x)
                     ge.pop(x)
+                    alive -= 1
 
                 if not pipe.pipe_passed and pipe.pipes_surface_bottom_rect.centerx < bird.x:
                     pipe.pipe_passed = True
@@ -236,12 +245,13 @@ def main(genomes, config):
                 birds.pop(x)
                 nets.pop(x)
                 ge.pop(x)
+                alive -= 1
 
         # MOVES FLOOR
         floor.move()
 
         # PUTS IMAGES IN GAME
-        draw_screen(win, floor, pipes, birds, score, generation)
+        draw_screen(win, floor, pipes, birds, score, generation, alive)
 
 
 # LOADS NEAT CONFIG FILE
