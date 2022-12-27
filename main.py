@@ -41,7 +41,7 @@ bird_flap = pygame.USEREVENT
 pygame.time.set_timer(bird_flap, 100)
 
 
-# CLASS DEFINES FLOOR BIRD
+# CLASS DEFINES BIRD ELEMENTS
 class Bird:
     def __init__(self, x, y):
         self.x = x
