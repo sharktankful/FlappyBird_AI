@@ -18,7 +18,7 @@ screen_height = 800
 game_font = pygame.font.SysFont('comicsans', 35)
 white = (255, 255, 255)
 
-# VARIBALE FOR GENERATIONS RUN
+# VARIBALE FOR GENERATIONS RAN
 generation = 0
 
 # IMAGES
