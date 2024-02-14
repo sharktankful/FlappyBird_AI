@@ -12,6 +12,6 @@ INSTRUCTIONS:
 
 4. Run the following command which will not only create the virtual enviorment but also install the dependencies from the pipfiles: ```pipenv shell```
 
-5. Navigate to the main.py file and run the code to start the game!
+5. Run the main.py file to start the game!
 
 6. If your want to exit the virtual enviornment made by pipenv, just run the command ```exit``` to exit. To start the enviornment again, run the command ```pipenv shell```
